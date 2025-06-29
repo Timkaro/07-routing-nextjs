@@ -1,13 +1,19 @@
 import { createPortal } from "react-dom";
-import { useEffect } from "react";
-import NoteForm from "../NoteForm/NoteForm";
-import css from "./NoteModal.module.css";
+import { useEffect, ReactNode, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import css from "./Modal.module.css";
 
 interface NoteModalProps {
   onClose: () => void;
+  children: ReactNode;
 }
 
-export default function NoteModal({ onClose }: NoteModalProps) {
+export default function NoteModal({ children }: NoteModalProps) {
+  const router = useRouter();
+  const onClose = useCallback(() => {
+    router.back();
+  }, [router]);
+
   // Закриття по натисканню Escape
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -39,9 +45,7 @@ export default function NoteModal({ onClose }: NoteModalProps) {
       aria-modal="true"
       onClick={handleBackdropClick}
     >
-      <div className={css.modal}>
-        <NoteForm onClose={onClose} />
-      </div>
+      <div className={css.modal}>{children}</div>
     </div>,
     document.body,
   );

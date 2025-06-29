@@ -23,18 +23,21 @@ interface FetchParams {
   search?: string;
   page?: number;
   perPage?: number;
+  tag?: string;
 }
 
 export async function fetchNotes(
   searchText: string,
   page: number,
-  perPage: number = 12,
+  perPage: number = 9,
+  tag?: string,
 ): Promise<FetchNotes> {
   try {
     const params: FetchParams = {
       ...(searchText.trim() !== "" && { search: searchText.trim() }),
       page,
       perPage,
+      tag,
     };
     const res = await axiosInstance.get<FetchNotes>("/notes", { params });
     return res.data;

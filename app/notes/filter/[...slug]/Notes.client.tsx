@@ -1,44 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { fetchNotes } from "../../lib/api";
-import Pagination from "../../components/Pagination/Pagination";
-import NoteList from "../../components/NoteList/NoteList";
-import NoteModal from "../../components/NoteModal/NoteModal";
-import SearchBox from "../../components/SearchBox/SearchBox";
+import { fetchNotes } from "@/lib/api";
+import Pagination from "@/components/Pagination/Pagination";
+import NoteList from "@/components/NoteList/NoteList";
+import NoteForm from "@/components/NoteForm/NoteForm";
+import Modal from "@/components/Modal/Modal";
+import SearchBox from "@/components/SearchBox/SearchBox";
 import type { Note } from "@/types/note";
 import css from "./NotesPage.module.css";
 
 type Props = {
-  initialSearch: string;
-  initialPage: number;
   initialData: {
     notes: Note[];
     totalPages: number;
   };
+  category?: string;
 };
 
-export default function NotesClient({
-  initialSearch,
-  initialPage,
-  initialData,
-}: Props) {
+export default function NotesClient({ initialData, category }: Props) {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [debouncedSearch] = useDebounce(searchText, 300);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, category]);
+
   const notes = useQuery({
-    queryKey: ["notes", debouncedSearch, currentPage],
-    queryFn: () => fetchNotes(debouncedSearch, currentPage),
+    queryKey: ["notes", debouncedSearch, currentPage, category],
+    queryFn: () => fetchNotes(debouncedSearch, currentPage, 9, category),
     placeholderData: keepPreviousData,
-    initialData:
-      debouncedSearch === initialSearch && currentPage === initialPage
-        ? initialData
-        : undefined,
+    refetchOnMount: false,
+    initialData,
   });
 
   const totalPages = notes.data?.totalPages ?? 0;
@@ -74,7 +72,11 @@ export default function NotesClient({
         <NoteList notes={notes.data?.notes ?? []} />
       )}
 
-      {isModalOpen && <NoteModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <NoteForm onClose={() => setIsModalOpen(false)} />
+        </Modal>
+      )}
     </div>
   );
 }
