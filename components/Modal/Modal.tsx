@@ -1,18 +1,15 @@
 import { createPortal } from "react-dom";
-import { useEffect, ReactNode, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, ReactNode, useRef } from "react";
 import css from "./Modal.module.css";
 
-interface NoteModalProps {
+interface ModalProps {
   onClose: () => void;
   children: ReactNode;
 }
 
-export default function NoteModal({ children }: NoteModalProps) {
-  const router = useRouter();
-  const onClose = useCallback(() => {
-    router.back();
-  }, [router]);
+export default function Modal({ children, onClose }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const focusedElement = useRef<HTMLElement | null>(null);
 
   // Закриття по натисканню Escape
   useEffect(() => {
@@ -27,7 +24,6 @@ export default function NoteModal({ children }: NoteModalProps) {
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     return () => {
       document.body.style.overflow = originalOverflow;
     };
@@ -37,6 +33,15 @@ export default function NoteModal({ children }: NoteModalProps) {
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) onClose();
   };
+
+  // Управління фокусом
+  useEffect(() => {
+    focusedElement.current = document.activeElement as HTMLElement;
+    modalRef.current?.focus();
+    return () => {
+      focusedElement.current?.focus();
+    };
+  }, []);
 
   return createPortal(
     <div
