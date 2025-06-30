@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
   },
 });
 
-interface FetchNotesProps {
+interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
@@ -37,9 +37,9 @@ function errorMessage(error: unknown): string {
 export async function fetchNotes(
   searchText: string,
   page: number,
-  perPage: number = 9,
+  perPage?: number,
   tag?: string,
-): Promise<FetchNotesProps> {
+): Promise<FetchNotesResponse> {
   try {
     const params: FetchParams = {
       ...(searchText.trim() !== "" && { search: searchText.trim() }),
@@ -47,7 +47,9 @@ export async function fetchNotes(
       perPage,
       tag,
     };
-    const res = await axiosInstance.get<FetchNotesProps>("/notes", { params });
+    const res = await axiosInstance.get<FetchNotesResponse>("/notes", {
+      params,
+    });
     return res.data;
   } catch (error) {
     console.error(`Failed to fetch notes: ${errorMessage(error)}`);

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import css from "./TagsMenu.module.css";
 import Link from "next/link";
 
-const tags = ["all", "Todo", "Work", "Personal", "Meeting", "Shopping"];
+const tags = ["All", "Todo", "Work", "Personal", "Meeting", "Shopping"];
 
 export default function TagsMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +14,7 @@ export default function TagsMenu() {
   const menuRef = useRef<HTMLUListElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
+  // Закриття по Escape
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -23,12 +24,26 @@ export default function TagsMenu() {
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-    } else {
-      window.removeEventListener("keydown", handleKeyDown);
     }
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Закриття по кліку поза меню
+  useEffect(() => {
+    const handleClickOut = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOut);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOut);
     };
   }, [isOpen]);
 
@@ -45,7 +60,7 @@ export default function TagsMenu() {
         Notes ▾
       </button>
       {isOpen && (
-        <ul className={css.menuList} id="tags-menu" role="menu" ref={menuRef}>
+        <ul className={css.menuList} id="tags-menu" role="menu">
           {tags.map((tag) => (
             <li className={css.menuItem} key={tag} role="none">
               <Link
@@ -54,7 +69,7 @@ export default function TagsMenu() {
                 onClick={toggle}
                 role="menuitem"
               >
-                {tag === "all" ? "All notes" : tag}
+                {tag === "All" ? "All notes" : tag}
               </Link>
             </li>
           ))}

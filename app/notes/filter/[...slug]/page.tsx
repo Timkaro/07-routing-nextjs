@@ -7,7 +7,7 @@ type Props = {
 
 export default async function AppPage({ params }: Props) {
   const { slug } = await params;
-  const category = slug[0] === "all" ? undefined : slug[0];
+  const category = slug[0] === "All" ? undefined : slug[0];
   const data = await fetchNotes("", 1, 9, category);
 
   return <NotesClient initialData={data} tag={category} />;

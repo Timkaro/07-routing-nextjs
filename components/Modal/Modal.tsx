@@ -50,7 +50,14 @@ export default function Modal({ children, onClose }: ModalProps) {
       aria-modal="true"
       onClick={handleBackdropClick}
     >
-      <div className={css.modal}>{children}</div>
+      <div
+        className={css.modal}
+        ref={modalRef}
+        tabIndex={-1}
+        aria-label="Modal content"
+      >
+        {children}
+      </div>
     </div>,
     document.body,
   );
